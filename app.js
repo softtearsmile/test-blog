@@ -2,10 +2,14 @@ const koa = require('koa');
 const router = require('./routers/routers');
 const static = require('koa-static');
 const views = require('koa-views');
+const body = require('koa-body');
 const {join} = require('path');
 
 //生成app实例
 const app = new koa();
+
+//配置koa-body 处理 post请求数据
+app.use(body());
 
 //配置pug资源目录
 app.use(views(join(__dirname, "views"),{
