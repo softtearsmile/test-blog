@@ -6,7 +6,7 @@ const encryto = require('../util/encrypto');
 const User = db.model("users",UserSchema);
 
 //用户注册
-exports.reg = async (ctx) => {
+exports.reg = async ctx => {
     const user = ctx.request.body;
     const username = user.username;
     const password = user.password;
@@ -48,7 +48,7 @@ exports.reg = async (ctx) => {
 };
 
 //用户登入
-exports.login = async (ctx) => {
+exports.login = async ctx => {
     const user = ctx.request.body;
     const username = user.username;
     const password = user.password;
@@ -74,11 +74,32 @@ exports.login = async (ctx) => {
     })
         .then(async data => {
             if (data){
+                //让用户在其 cookie 里设置 username
+                ctx.cookies.set("username", username, {
+                    domain: "localhost",
+                    path: '/',
+                    maxAge: 36e5,
+                    httpOnly: true,
+                    overwrite: false,
+                });
+
+                ctx.cookies.set('uid', data[0]._id, {
+                    domain: "localhost",
+                    path: '/',
+                    maxAge: 36e5,
+                    httpOnly: true,
+                    overwrite: false,
+                });
+
+                ctx.session = { //后台保存便于比对
+                    username,
+                    uid : data[0]._id,
+                };
+
                 await ctx.render('isok',{status : "登入成功"})
             }else {
                 await ctx.render('isok',{status : "密码错误"})
             }
-
         })
         .catch(async err => {
             if (err === "用户不存在"){
@@ -87,4 +108,27 @@ exports.login = async (ctx) => {
                 await ctx.render('isok',{status : "登入失败"})
             }
         })
+};
+
+//保持用户的状态
+exports.keepLogin = async (ctx,next) => { //一般为第一个中间键
+    if(ctx.session.isNew){ //没有session
+        if (ctx.cookies.get('username')) {
+            ctx.session = {
+                username : ctx.cookies.get('username'),
+                uid :ctx.cookies.get('uid'),
+            }
+        }
+    }
+    await next()
+};
+
+//用户退出
+exports.logout = async ctx => {
+    ctx.session = null;
+    ctx.cookies.set("username",null,{maxAge:0});
+    ctx.cookies.set("uid",null,{maxAge:0});
+
+    //在后台重定向到 根
+    ctx.redirect('/');
 };
