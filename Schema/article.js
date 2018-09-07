@@ -1,13 +1,17 @@
 const {Schema} = require('./config');
-
+const ObjectId = Schema.Types.ObjectId;
 const ArticleSchema = new Schema({
     title : String,
     content : String,
-    article : String,
     tips : String,
+    commentNum : Number,
+    author : {
+        type : ObjectId,
+        ref : "users"
+    },
 },{
     versionKey : false,
-    timestamps : { //代码提示有问题 应该是timestamp + s !
+    timestamps : {
         createdAt : "created"
     }
 });

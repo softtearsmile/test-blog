@@ -36,6 +36,36 @@ app.use(views(join(__dirname, "views"),{
 //配置静态资源目录
 app.use(static(join(__dirname, "public")));
 
+//生成超级管理员
+{
+    const {db} = require('./Schema/config');
+    const UserSchema = require('./Schema/user');
+    const encryto = require('./util/encrypto');
+    const User = db.model("users",UserSchema);
+
+    //查找是否已有超级管理
+    User
+        .find({username: "admin"})
+        .then((data) => {
+            if (data.length ===0){
+                //创建超级管理员
+                new User({
+                    username : "admin",
+                    password : encryto("admin"),
+                    role : 666,
+                    articleNum : 0,
+                    commentNum : 0,
+                }).save((err,data) => {
+                    if (err){return console.log(err)}
+                    console.log("超级管理员账号;admin,超级管理员密码;admin")
+                })
+            }else {
+                //已有超级管理员
+                console.log("超级管理员账号;admin,超级管理员密码;admin")
+            }
+        }).catch(err => console.log(err))
+}
+
 
 
 

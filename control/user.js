@@ -25,7 +25,9 @@ exports.reg = async ctx => {
             //用户名不存在 存入数据库 自定义加密密码
             const _user = new User({
                 username,
-                password : encryto(password)
+                password : encryto(password),
+                articleNum : 0,
+                commentNum : 0,
             });
             _user.save((err,data) => {
                 if (err){
@@ -94,6 +96,8 @@ exports.login = async ctx => {
                 ctx.session = { //后台保存便于比对
                     username,
                     uid : data[0]._id,
+                    avatar : data[0].avatar,
+                    role : data[0].role,
                 };
 
                 await ctx.render('isok',{status : "登入成功"})
