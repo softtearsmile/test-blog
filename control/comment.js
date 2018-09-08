@@ -1,14 +1,6 @@
-const {db} = require('../Schema/config');
-
-//关联什么库，就需要操作库的对象
-const UserSchema = require('../Schema/user');
-const User = db.model("users",UserSchema);
-
-const ArticleSchema = require('../Schema/article');
-const Article = db.model("articles",ArticleSchema);
-
-const CommentSchema = require('../Schema/comment');
-const Comment = db.model("comments",CommentSchema);
+const User = require('../models/user');
+const Article = require('../models/article');
+const Comment = require('../models/comment');
 
 
 //发表评论
@@ -38,11 +30,11 @@ exports.save = async ctx => {
                 msg : "评论成功"
             };
             Article
-                .update({_id : data.article},{$inc:{commentNum:1}},err => {
+                .updateOne({_id : data.article},{$inc:{commentNum:1}},err => {
                     if (err){return console.log(err)}
                 });
             User
-                .update({_id : data.from},{$inc:{commentNum:1}},err => {
+                .updateOne({_id : data.from},{$inc:{commentNum:1}},err => {
                     if (err){return console.log(err)}
                 });
         })
@@ -54,4 +46,43 @@ exports.save = async ctx => {
         });
 
     ctx.body = message
+};
+
+//获取当前用户所有评论
+exports.comlist = async ctx => {
+    const uid =ctx.session.uid;
+
+    const data = await Comment
+        .find({from: uid})
+        .populate('article', 'title')
+        .then(data => data)
+        .catch(err => console.log(err));
+
+    ctx.body = {
+        code: 0,
+        count: data.length,
+        data
+    };
+};
+
+//删除评论
+exports.del = async ctx => {
+    const commentId = ctx.params.id;
+
+    let res = {
+        state: 1,
+        message: "删除成功",
+    };
+
+    await Comment
+        .findById(commentId)
+        .then(data => data.remove())
+        .catch(err => {
+            res = {
+                state: 0,
+                message: err,
+            }
+        });
+
+    ctx.body = res
 };

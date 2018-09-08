@@ -1,9 +1,6 @@
-const {db} = require('../Schema/config');
-const UserSchema = require('../Schema/user');
+const User = require('../models/user');
 const encryto = require('../util/encrypto');
 
-//通过db 创建一个操作user数据库的对象
-const User = db.model("users",UserSchema);
 
 //用户注册
 exports.reg = async ctx => {
@@ -135,4 +132,40 @@ exports.logout = async ctx => {
 
     //在后台重定向到 根
     ctx.redirect('/');
+};
+
+//获取用户
+exports.userlist = async ctx => {
+    const data = await User
+        .find()
+        .then(data => data)
+        .catch(err => console.log(err));
+
+    ctx.body = {
+        code: 0,
+        count: data.length,
+        data
+    };
+};
+
+//删除用户
+exports.del = async ctx => {
+    const userId = ctx.params.id;
+    console.log(userId);
+    let res = {
+        state: 1,
+        message: "删除成功",
+    };
+
+    await User
+        .findById(userId)
+        .then(data => data.remove())
+        .catch(err => {
+            res = {
+                state: 0,
+                message: err,
+            }
+        });
+
+    ctx.body = res
 };

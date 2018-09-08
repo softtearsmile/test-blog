@@ -18,5 +18,16 @@ const CommentSchema = new Schema({
         createdAt : "created"
     }
 });
+CommentSchema.post('remove',doc => {
+    const User = require('../models/user');
+    const Article = require('../models/article');
 
+    const {from,article} = doc;
+
+    //删除对应文章评论数-1
+    Article.updateOne({_id:article},{$inc: {commentNum:-1}}).exec();
+
+    //删除对应用户评论数-1
+    User.updateOne({_id:from},{$inc: {commentNum:-1}}).exec();
+});
 module.exports = CommentSchema;

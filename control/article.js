@@ -1,12 +1,7 @@
-const {db} = require('../Schema/config');
-const ArticleSchema = require('../Schema/article');
-const Article = db.model("articles",ArticleSchema);
+const User = require('../models/user');
+const Article = require('../models/article');
+const Comment = require('../models/comment');
 
-const UserSchema = require('../Schema/user');
-const User = db.model("users",UserSchema);
-
-const CommentSchema = require('../Schema/comment');
-const Comment = db.model("comments",CommentSchema);
 
 //文章发表页
 exports.addPage = async ctx => {
@@ -47,7 +42,7 @@ exports.add = async ctx => {
                 status : 1,
             };
             User
-                .update({_id : data.author},{$inc:{articleNum:1}},err => {
+                .updateOne({_id : data.author},{$inc:{articleNum:1}},err => {
                     if (err){return console.log(err)}
                 })
         })
@@ -118,4 +113,42 @@ exports.details =async  ctx => {
         comment,
     })
 
+};
+
+//获取当前用户所有评论
+exports.artlist = async ctx => {
+    const uid =ctx.session.uid;
+
+    const data = await Article
+        .find({author: uid})
+        .then(data => data)
+        .catch(err => console.log(err));
+
+    ctx.body = {
+        code: 0,
+        count: data.length,
+        data
+    };
+};
+
+//删除文章
+exports.del = async ctx => {
+    const articleId = ctx.params.id;
+
+    let res = {
+        state: 1,
+        message: "删除成功",
+    };
+
+    await Article
+        .findById(articleId)
+        .then(data => data.remove())
+        .catch(err => {
+            res = {
+                state: 0,
+                message: err,
+            }
+        });
+
+    ctx.body = res
 };

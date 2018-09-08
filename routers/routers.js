@@ -45,6 +45,26 @@ router.post('/comment',user.keepLogin,comment.save);
 //个人中心
 router.get('/admin/:id',user.keepLogin,admin.index);
 
+//获取所有用户
+router.get('/user/users',user.keepLogin,user.userlist);
+
+//获取当前用户所有评论
+router.get('/user/comments',user.keepLogin,comment.comlist);
+
+//获取当前用户所有文章
+router.get('/user/articles',user.keepLogin,article.artlist);
+
+//删除用户
+router.delete('/user/:id',user.keepLogin,user.del);
+
+//删除当前用户评论
+router.delete('/comment/:id',user.keepLogin,comment.del);
+
+//删除当前用户文章
+router.delete('/article/:id',user.keepLogin,article.del);
+
+
+
 
 
 
