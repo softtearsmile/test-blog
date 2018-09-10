@@ -3,6 +3,7 @@ const user = require('../control/user');
 const article = require('../control/article');
 const comment = require('../control/comment');
 const admin = require('../control/admin');
+const upload = require('../util/upload');
 
 const router = new Router();
 
@@ -38,12 +39,14 @@ router.get('/page/:id',user.keepLogin,article.getList);
 //文章详情页
 router.get('/article/:id',user.keepLogin,article.details);
 
-
 //发表评论
 router.post('/comment',user.keepLogin,comment.save);
 
 //个人中心
 router.get('/admin/:id',user.keepLogin,admin.index);
+
+//头像上传
+router.post('/upload',user.keepLogin,upload.single('file'),user.upload);
 
 //获取所有用户
 router.get('/user/users',user.keepLogin,user.userlist);

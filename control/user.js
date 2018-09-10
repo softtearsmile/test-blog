@@ -148,6 +148,28 @@ exports.userlist = async ctx => {
     };
 };
 
+//上传用户头像
+exports.upload = async ctx => {
+
+    const filename = ctx.req.file.filename;
+    let data = {
+        status : 1,
+        message : "上传成功"
+    };
+
+    await User.updateOne({_id:ctx.session.uid},{$set:{avatar: "/avatar/"+filename}},(err,res) => {
+        if (err) {
+            return data = {
+            status : 0,
+            message : "上传失败"
+        }}else {
+            ctx.session.avatar = "/avatar/"+filename;
+        }
+    });
+
+    ctx.body = data
+};
+
 //删除用户
 exports.del = async ctx => {
     const userId = ctx.params.id;
